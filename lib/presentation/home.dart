@@ -1,5 +1,7 @@
 
+import 'package:calory_counter/data/pfc_repository.dart';
 import 'package:calory_counter/domain/model/circular_data_pfc.dart';
+import 'package:calory_counter/domain/model/user.dart';
 import 'package:flutter/material.dart';
 
 class StatisticService {
@@ -50,7 +52,6 @@ class FoodService {
 
   getFood() {
     return [
-
       {
         "display": "Running",
         "value": "Running1",
@@ -98,5 +99,24 @@ class RecommendationService {
 
   getRecommendation(DateTime dateTime){
     return "рекоммендация";
+  }
+}
+
+
+class UserService {
+  static UserService? service;
+  static UserService getUserService() {
+    service ??= UserService();
+    return service!;
+  }
+
+  Future<User> getUser() async{
+    var userValue = await DBProvider.db.getUser();
+    return userValue;
+  }
+
+  save(User user){
+    DBProvider.db.saveUser(user);
+    return user;
   }
 }

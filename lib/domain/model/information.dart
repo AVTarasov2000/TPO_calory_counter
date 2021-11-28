@@ -5,6 +5,7 @@ class Information {
   double fat = 0;
   double carbohydrates = 0;
   double calories = 0;
+  double watter = 0;
 
   Information (this.calories, this.carbohydrates, this.fat, this.proteins);
 

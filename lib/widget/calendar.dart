@@ -4,6 +4,7 @@ import 'package:calory_counter/domain/model/circular_data_pfc.dart';
 import 'package:calory_counter/domain/model/recommendation.dart';
 import 'package:calory_counter/presentation/home.dart';
 import 'package:calory_counter/widget/pfc_vidget.dart';
+import 'package:calory_counter/widget/user_widget.dart';
 import 'package:calory_counter/widget/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +32,17 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calories_counter'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle_outlined),
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => UserWidget()),
+              )
+            },
+          ),
+        ],
       ),
       body: Column(
         children: <Widget>[
