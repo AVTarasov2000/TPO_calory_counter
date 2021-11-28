@@ -86,3 +86,17 @@ class FoodService {
     ];
   }
 }
+
+
+class RecommendationService {
+
+  static RecommendationService? service;
+  static RecommendationService getRecommendationService() {
+    service ??= RecommendationService();
+    return service!;
+  }
+
+  getRecommendation(DateTime dateTime){
+    return "рекоммендация";
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:calory_counter/calendarLib/table_calendar.dart';
 import 'package:calory_counter/calendarLib/src/shared/utils.dart';
 import 'package:calory_counter/domain/model/circular_data_pfc.dart';
+import 'package:calory_counter/domain/model/recommendation.dart';
 import 'package:calory_counter/presentation/home.dart';
 import 'package:calory_counter/widget/pfc_vidget.dart';
 import 'package:calory_counter/widget/utils.dart';
@@ -23,6 +24,7 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   DateTime? _rangeEnd;
 
   StatisticService statisticService = StatisticService.getStatisticService();
+  RecommendationService recommendationService = RecommendationService.getRecommendationService();
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +79,12 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
           PfcWidget(data: statisticService.getCarbohydrates(_focusedDay),),
           PfcWidget(data: statisticService.getProteins(_focusedDay),),
           PfcWidget(data: statisticService.getWater(_focusedDay),),
+          RaisedButton(
+            child: Text('get recommendation'),
+            onPressed: () {
+              showAlertDialog(context);
+            },
+          )
         ]
       ),
       floatingActionButton: FloatingActionButton(
@@ -87,6 +95,31 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  showAlertDialog(BuildContext context) {
+
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Рекомендация"),
+      content: Text(recommendationService.getRecommendation(DateTime.now())),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 }

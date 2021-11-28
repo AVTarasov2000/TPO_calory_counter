@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'calendar.dart';
 
 class AddFoodWidget extends StatefulWidget {
+  AddFoodWidget({Key? key}) : super(key: key);
 
   final TextEditingController _amountTextController = new TextEditingController();
   @override
