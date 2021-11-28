@@ -6,6 +6,8 @@ import 'package:calory_counter/widget/pfc_vidget.dart';
 import 'package:calory_counter/widget/utils.dart';
 import 'package:flutter/material.dart';
 
+import 'add_food_widget.dart';
+
 
 class TableBasicsExample extends StatefulWidget {
   @override
@@ -31,7 +33,6 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
       body: Column(
         children: <Widget>[
           TableCalendar(
-
             firstDay: kFirstDay,
             lastDay: kLastDay,
             focusedDay: _focusedDay,
@@ -79,12 +80,10 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
         ]
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          setState(() {
-            _selectedDay = DateTime.now();
-            _focusedDay = DateTime.now();
-          });
-        },
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddFoodWidget()),
+        ),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
