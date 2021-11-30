@@ -1,4 +1,6 @@
 import 'package:calory_counter/data/scripts/create_table.dart';
+import 'package:calory_counter/domain/model/dish.dart';
+import 'package:intl/intl.dart';
 import "package:path/path.dart" show dirname, join;
 import 'dart:io' show Directory, File, Platform;
 
@@ -38,7 +40,7 @@ class DBProvider {
 
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path =join(documentsDirectory.path, "CaloriesCounterTest2.db");
+    String path =join(documentsDirectory.path, "CaloriesCounterTest4.db");
     return await openDatabase(path, version: 1, onOpen: (db) {
     }, onCreate: (Database db, int version) async {
       await db.execute(
@@ -53,16 +55,11 @@ class DBProvider {
           "    watter        INT"
           ")");
       await db.execute(
-          "CREATE TABLE Information "
-          "("
-          "    id            INTEGER PRIMARY KEY,"
-          "    date          DATE,"
-          "    time          TIME,"
-          "    proteins      INT,"
-          "    fat           INT,"
-          "    carbohydrates INT,"
-          "    calories      INT,"
-          "    watter        INT"
+              "CREATE TABLE Information "
+              "("
+              "    id       INTEGER PRIMARY KEY,"
+              "    datetime TEXT,"
+              "    dish_id  INT REFERENCES Dish(id) "
           ")");
       await db.execute(
           "CREATE TABLE MyUser "
@@ -75,9 +72,8 @@ class DBProvider {
           ")"
       );
       await db.rawInsert(
-          "INSERT INTO MyUser ( id, height, weight, age,mode )"
+          "INSERT INTO MyUser ( id, height, weight, age, mode )"
               " VALUES ( 0, 0, 0, 0, 0 )");
-      // await db.insert("MyUser", {"id":0, "height":0, "weight":0, "age":0, "mode":0 });
       await db.rawInsert(
           "INSERT INTO Dish (name,proteins,fat,carbohydrates,calories,watter) "
           "VALUES "
@@ -93,6 +89,17 @@ class DBProvider {
     var res = await db.update("MyUser", user.toJson());
     return res;
   }
+
+  saveMeal(List<Dish> meal) async{
+    final db = await database;
+    var datetime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    for (var dish in meal) {
+      await db.rawInsert(
+        "INSERT INTO Information (datetime, dish_id)"
+          " VALUES ('${datetime}', ${dish.id})");
+    }
+  }
+
   getUser() async {
     final db = await database;
     var res = await db.query("MyUser", where: "id = ?", whereArgs: [0]);

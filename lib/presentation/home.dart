@@ -1,6 +1,7 @@
 
 import 'package:calory_counter/data/pfc_repository.dart';
 import 'package:calory_counter/domain/model/circular_data_pfc.dart';
+import 'package:calory_counter/domain/model/dish.dart';
 import 'package:calory_counter/domain/model/user.dart';
 import 'package:flutter/material.dart';
 
@@ -52,6 +53,10 @@ class FoodService {
       DBProvider.db.allDishes().then((val){foodList = val;});
     }
     return service;
+  }
+
+  saveMeal(List<Dish> meal){
+    DBProvider.db.saveMeal(meal);
   }
   
 }

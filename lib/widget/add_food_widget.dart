@@ -25,7 +25,6 @@ class _AddFoodWidget extends State<AddFoodWidget> {
 
   @override
   void initState() {
-    print(FoodService.foodList);
   }
 
   @override
@@ -111,7 +110,7 @@ class _AddFoodWidget extends State<AddFoodWidget> {
                     RaisedButton(
                       child: Text('Save'),
                       onPressed: () {
-
+                        statisticService.saveMeal(dishes);
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => TableBasicsExample()),
