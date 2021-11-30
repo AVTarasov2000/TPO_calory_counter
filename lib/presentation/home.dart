@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class StatisticService {
 
-  static StatisticService? service = null;
+  static StatisticService? service;
 
   static getStatisticService(){
     service ??= StatisticService();
@@ -43,49 +43,17 @@ class StatisticService {
 
 class FoodService {
 
-  static FoodService? service = null;
+  static FoodService? service;
+  static List foodList = [];
 
   static getFoodService(){
-    service ??= FoodService();
+    if (service == null){
+      service = FoodService();
+      DBProvider.db.allDishes().then((val){foodList = val;});
+    }
     return service;
   }
-
-  getFood() {
-    return [
-      {
-        "display": "Running",
-        "value": "Running1",
-      },
-      {
-        "display": "Running",
-        "value": "Running",
-      },
-      {
-        "display": "Climbing",
-        "value": "Climbing",
-      },
-      {
-        "display": "Walking",
-        "value": "Walking",
-      },
-      {
-        "display": "Swimming",
-        "value": "Swimming",
-      },
-      {
-        "display": "Soccer Practice",
-        "value": "Soccer Practice",
-      },
-      {
-        "display": "Baseball Practice",
-        "value": "Baseball Practice",
-      },
-      {
-        "display": "Football Practice",
-        "value": "Football Practice",
-      },
-    ];
-  }
+  
 }
 
 
@@ -111,8 +79,7 @@ class UserService {
   }
 
   Future<User> getUser() async{
-    var userValue = await DBProvider.db.getUser();
-    return userValue;
+    return await DBProvider.db.getUser();
   }
 
   save(User user){

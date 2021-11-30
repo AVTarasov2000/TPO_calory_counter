@@ -1,8 +1,10 @@
+import 'package:calory_counter/presentation/home.dart';
 import 'package:calory_counter/widget/calendar.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
+  FoodService statisticService = FoodService.getFoodService();
 }
 
 class MyApp extends StatelessWidget {

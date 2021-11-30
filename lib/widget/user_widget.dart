@@ -21,7 +21,7 @@ class UserWidget extends StatefulWidget {
 
 class _UserWidget extends State<UserWidget> {
   UserService userService = UserService.getUserService();
-  late User user = User(0,0,0,0,0);
+  late User user = User(0,0,0,0,1);
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _UserWidget extends State<UserWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add food'),
+        title: Text('User'),
       ),
       body: Column(children: <Widget>[
         Container(
@@ -91,7 +91,7 @@ class _UserWidget extends State<UserWidget> {
           child: DropDownFormField(
             titleText: 'My workout',
             hintText: 'Please choose one',
-            value: 1,
+            value: user.mode,
             onSaved: (value) {
               setState(() {
                 user.mode = value;

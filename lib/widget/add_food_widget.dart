@@ -10,17 +10,23 @@ import 'calendar.dart';
 class AddFoodWidget extends StatefulWidget {
   AddFoodWidget({Key? key}) : super(key: key);
 
-  final TextEditingController _amountTextController = new TextEditingController();
+  final TextEditingController _amountTextController = TextEditingController();
   @override
   _AddFoodWidget createState() => _AddFoodWidget();
 }
 
 class _AddFoodWidget extends State<AddFoodWidget> {
-  Dish dish = Dish('', 0);
+  var value = FoodService.foodList[0]["value"];
+  var amount = 0;
   List<Dish> dishes = [];
 
-  final formKey = new GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   FoodService statisticService = FoodService.getFoodService();
+
+  @override
+  void initState() {
+    print(FoodService.foodList);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +40,18 @@ class _AddFoodWidget extends State<AddFoodWidget> {
           child: DropDownFormField(
             titleText: 'My workout',
             hintText: 'Please choose one',
-            value: dish.name,
+            value: this.value,
             onSaved: (value) {
               setState(() {
-                dish.name = value;
+                this.value = value;
               });
             },
             onChanged: (value) {
               setState(() {
-                dish.name = value;
+                this.value = value;
               });
             },
-            dataSource: statisticService.getFood(),
+            dataSource: FoodService.foodList,
             textField: 'display',
             valueField: 'value',
           ),
@@ -76,8 +82,8 @@ class _AddFoodWidget extends State<AddFoodWidget> {
                       child: Icon(Icons.add),
                       onPressed: () {
                         setState(() {
-                          dish.amount+=100;
-                          widget._amountTextController.text = dish.amount.toString();
+                          amount+=100;
+                          widget._amountTextController.text = amount.toString();
                         });
                       },
                     )
@@ -87,10 +93,10 @@ class _AddFoodWidget extends State<AddFoodWidget> {
                       child: Icon(Icons.remove),
                       onPressed: () {
                         setState(() {
-                          if (dish.amount-100 >= 0) {
-                            dish.amount -= 100;
+                          if (amount-100 >= 0) {
+                            amount -= 100;
                           }
-                          widget._amountTextController.text = dish.amount.toString();
+                          widget._amountTextController.text = amount.toString();
                         });
                       },
                     )
@@ -118,15 +124,13 @@ class _AddFoodWidget extends State<AddFoodWidget> {
                       child: Text('add'),
                       onPressed: () {
                         setState(() {
-                          if (dishes.map((e) => e.name).contains(dish.name)){
-                            dishes.firstWhere((element) => element.name == dish.name).amount+=dish.amount;
+                          if (dishes.map((e) => e.id).contains(value)){
+                            dishes.firstWhere((element) => element.id == value).amount+=amount;
                           } else{
-                            dishes.add(Dish(dish.name, dish.amount));
+                            dishes.add(Dish(value, getName(value), amount));
                           }
                           setDefault();
                         });
-                        print(dish.amount);
-                        print(dish.name);
                       },
                     )
                   ])
@@ -166,8 +170,12 @@ class _AddFoodWidget extends State<AddFoodWidget> {
     );
   }
 
+  getName(var id){
+    return FoodService.foodList.firstWhere((item)=>(item["id"] == id))["display"];
+  }
+
   setDefault(){
-    dish.amount = 0;
+    amount = 0;
     widget._amountTextController.text = '0';
   }
 }
