@@ -148,7 +148,7 @@ class _AddFoodWidget extends State<AddFoodWidget> {
                           child: Text('remove'),
                           onPressed: () {
                             setState(() {
-                              dishes.remove(dishes.firstWhere((element) => element.name == item.name));
+                              dishes.remove(dishes.firstWhere((element) => element.id == item.id));
                             });
                           },
                         )
@@ -171,7 +171,7 @@ class _AddFoodWidget extends State<AddFoodWidget> {
   }
 
   getName(var id){
-    return FoodService.foodList.firstWhere((item)=>(item["id"] == id))["display"];
+    return FoodService.foodList.firstWhere((item)=>(item["value"] == id))["display"];
   }
 
   setDefault(){
