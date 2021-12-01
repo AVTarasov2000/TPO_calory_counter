@@ -9,6 +9,6 @@ class CaloriesDeficitCounter {
 
 
   Recommendation recommend(Information dayInformation, DateTime timeOfDay){
-    return Recommendation(Information(0,0,0,0), Information(0,0,0,0));
+    return Recommendation(Information(0,0,0,0,0), Information(0,0,0,0,0));
   }
 }

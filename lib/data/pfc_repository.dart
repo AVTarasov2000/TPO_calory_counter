@@ -1,4 +1,3 @@
-import 'package:calory_counter/data/scripts/create_table.dart';
 import 'package:calory_counter/domain/model/dish.dart';
 import 'package:intl/intl.dart';
 import "package:path/path.dart" show dirname, join;
@@ -13,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 
 class PFCRepository{
   Information getDay() {
-    return Information(0, 0, 0, 0);
+    return Information(0, 0, 0, 0, 0);
   }
 
 }
@@ -25,6 +24,7 @@ class MockPFCRepository extends PFCRepository{
 }
 
 class DBProvider {
+  DBProvider();
   DBProvider._();
   static final DBProvider db = DBProvider._();
 
@@ -40,7 +40,7 @@ class DBProvider {
 
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path =join(documentsDirectory.path, "CaloriesCounterTest4.db");
+    String path =join(documentsDirectory.path, "CaloriesCounterTest5.db");
     return await openDatabase(path, version: 1, onOpen: (db) {
     }, onCreate: (Database db, int version) async {
       await db.execute(
@@ -48,6 +48,7 @@ class DBProvider {
           "("
           "    id            INTEGER PRIMARY KEY,"
           "    name          TEXT,"
+
           "    proteins      INT,"
           "    fat           INT,"
           "    carbohydrates INT,"
@@ -58,7 +59,8 @@ class DBProvider {
               "CREATE TABLE Information "
               "("
               "    id       INTEGER PRIMARY KEY,"
-              "    datetime TEXT,"
+              "    datetime DATETIME,"
+              "    amount INT,"
               "    dish_id  INT REFERENCES Dish(id) "
           ")");
       await db.execute(
@@ -73,7 +75,7 @@ class DBProvider {
       );
       await db.rawInsert(
           "INSERT INTO MyUser ( id, height, weight, age, mode )"
-              " VALUES ( 0, 0, 0, 0, 0 )");
+              " VALUES ( 0, 170, 60, 25, 2 )");
       await db.rawInsert(
           "INSERT INTO Dish (name,proteins,fat,carbohydrates,calories,watter) "
           "VALUES "
@@ -90,13 +92,13 @@ class DBProvider {
     return res;
   }
 
-  saveMeal(List<Dish> meal) async{
+  saveMeal(List<Dish> meal, DateTime dateTime) async{
     final db = await database;
-    var datetime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    var datetime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
     for (var dish in meal) {
       await db.rawInsert(
-        "INSERT INTO Information (datetime, dish_id)"
-          " VALUES ('${datetime}', ${dish.id})");
+        "INSERT INTO Information (datetime, amount, dish_id)"
+          " VALUES ('${datetime}', ${dish.amount}, ${dish.id})");
     }
   }
 

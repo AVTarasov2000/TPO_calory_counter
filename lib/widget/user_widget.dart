@@ -20,7 +20,7 @@ class UserWidget extends StatefulWidget {
 }
 
 class _UserWidget extends State<UserWidget> {
-  UserService userService = UserService.getUserService();
+  UserService userService = UserService.service;
   late User user = User(0,0,0,0,1);
 
   @override

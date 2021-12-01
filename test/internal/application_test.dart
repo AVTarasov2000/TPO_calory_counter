@@ -1,86 +1,72 @@
 import 'package:calory_counter/data/pfc_repository.dart';
-import 'package:calory_counter/domain/enums/meal.dart';
-import 'package:calory_counter/domain/enums/mode.dart';
 import 'package:calory_counter/domain/model/information.dart';
-import 'package:calory_counter/domain/model/recommendation.dart';
-import 'package:calory_counter/internal/aplication.dart';
-import 'package:calory_counter/internal/pfc_counter.dart';
+import 'package:calory_counter/domain/model/user.dart';
+import 'package:calory_counter/presentation/home.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
+class DBProviderMock extends DBProvider{
+
+  getUser() async {
+    print("DBProviderMock");
+    return User(0, 50, 170, 20, 2);
+  }
+}
 
 void main() {
-
-  CaloriesDeficitCounter caloriesDeficitCounter = CaloriesDeficitCounter();
-  double proteins = 2000;
-  double fat = 250;
-  double carbohydrates = 44;
-  double calories = 150;
-  Information mockDayRecommend = Information(proteins, fat, carbohydrates, calories);
-  PFCRepository pfcRepository = MockPFCRepository(mockDayRecommend);
-  PFCCalculator pfcCalculator = PFCCalculator(pfcRepository);
-
-
+  RecommendationService recommendationService = RecommendationService.service;
+  UserService userService = UserService.service;
+  RecommendationRepository recommendationRepository = RecommendationRepository.repository;
 
   setUp(() {
-
+    userService.db = DBProviderMock();
   });
 
-  testWidgets('до 12 часов/до первого и до второго приема пищи', (WidgetTester tester) async {
-
-    Information dayInformation = Information(0, 0, 0, 0);
-    Information lack = Information(0, 0, 0, 0);
-    Information dayRecommend = Information(2000, 250, 44, 150);
-    Recommendation recommendation = Recommendation(lack, dayRecommend);
-    DateTime timeOfDay = DateTime.parse("2020-10-10 11:18:04Z");
-    expect(caloriesDeficitCounter.recommend(dayInformation, timeOfDay), recommendation);
+  testWidgets('персональный лимит', (WidgetTester tester) async {
+    Information asis = await userService.getUserLimit();
+    expect(asis.calories, 1642);
+    expect(asis.fat, 36);
+    expect(asis.proteins, 123);
+    expect(asis.carbohydrates, 205);
+    expect(asis.watter, 1000);
   });
 
-  testWidgets('с 12 до 16 часов/после первого и до второго приема пищи', (WidgetTester tester) async {
+  testWidgets('рекоммендации по часам', (WidgetTester tester) async {
+    Information information = Information(100,100,100,100,100);
+    expect(await recommendationService.getMealRec(information, 11),Information(35,35,35,35,35));
+    expect(await recommendationService.getMealRec(information, 14),Information(80,80,80,80,80));
+    expect(await recommendationService.getMealRec(information,  18), Information(100,100,100,100,100));
+    expect(await recommendationService.getMealRec(information, 21), Information(0,0,0,0,0));
+  });
+  testWidgets('вектор рекоммендации', (WidgetTester tester) async {
+    Information information = Information(100,100,100,100,100);
+    List<Information> dishes = [Information(80,80,80,80,80)];
+    expect(await recommendationService.getMealRecommend(information, dishes, DateTime(2021, 11, 8, 11, 35, 11)),Information(-45,-45,-45,-45,-45,));
+    expect(await recommendationService.getMealRecommend(information, dishes, DateTime(2021, 11, 8, 14, 35, 11)),Information(0,0,0,0,0));
+    expect(await recommendationService.getMealRecommend(information, dishes, DateTime(2021, 11, 8, 18, 35, 11)),Information(20,20,20,20,20));
+    expect(await recommendationService.getMealRecommend(information, dishes, DateTime(2021, 11, 8, 21, 35, 11)),Information(-80,-80,-80,-80,-80,));
+  });
+  testWidgets('список блюд по дате', (WidgetTester tester) async {
+    final db = await recommendationRepository.dbProvider.database;
+    db.rawInsert("INSERT INTO Dish (id,name,proteins,fat,carbohydrates,calories,watter) "
+        "VALUES "
+        "(7,'картошка', 7, 7, 7, 7, 7),"
+        "(8,'котлета', 8, 8, 8, 8, 8),"
+        "(9,'макарошки', 9, 9, 9, 9, 9),"
+        "(10,'пюрешка', 10, 10, 10, 10, 10)");
+    db.rawInsert(
+        "INSERT INTO Information (datetime, amount, dish_id)"
+        " VALUES ('2021-11-08 11:35:11', 200, 10)");
 
-    Information dayInformation = Information(500, 62.5, 11, 37.5);
-    Information lack = Information(200, 25, 4.4, 15);
-    Information dayRecommend = Information(1300, 162.5, 28.6, 97.5);
-    Recommendation recommendation = Recommendation(lack, dayRecommend);
-    DateTime timeOfDay = DateTime.parse("2020-10-10 14:18:04Z");
-    expect(caloriesDeficitCounter.recommend(dayInformation, timeOfDay), recommendation);
+    expect(await recommendationRepository.getDishes(DateTime(2021,11,8)), [Information(10,10,10,10,10)]);
+  });
+  testWidgets('до 12 часов', (WidgetTester tester) async {
+    recommendationRepository.getMostProteins();
+    recommendationRepository.getMostFats();
+    recommendationRepository.getMostCarbohidrates();
   });
 
-  testWidgets('с 16 до 20 часов/после второго и до второго приема пищи', (WidgetTester tester) async {
+  testWidgets('с 12 до 16 часов', (WidgetTester tester) async {
 
-    Information dayInformation = Information(1400, 175, 31, 105);
-    Information lack = Information(200, 25, 4.4, 15);
-    Information dayRecommend = Information(400, 50, 8.6, 30);
-    Recommendation recommendation = Recommendation(lack, dayRecommend);
-    DateTime timeOfDay = DateTime.parse("2020-10-10 18:18:04Z");
-    expect(caloriesDeficitCounter.recommend(dayInformation, timeOfDay), recommendation);
   });
-
-  testWidgets('после 20 часов/после третьего и до второго приема пищи', (WidgetTester tester) async {
-
-    Information dayInformation = Information(1800, 225, 39.6, 135);
-    Information lack = Information(200, 25, 4.4, 15);
-    Information dayRecommend = Information(0, 0, 0, 0);
-    Recommendation recommendation = Recommendation(lack, dayRecommend);
-    DateTime timeOfDay = DateTime.parse("2020-10-10 21:18:04Z");
-    expect(caloriesDeficitCounter.recommend(dayInformation, timeOfDay), recommendation);
-  });
-
-  testWidgets('рассчет бжу на день', (WidgetTester tester) async {
-    double loss = 0.9;
-    double increase = 1.1;
-    expect(pfcCalculator.day(Mode.LOSS), Information(proteins*loss, fat*loss, carbohydrates*loss, calories*loss));
-    expect(pfcCalculator.day(Mode.KEEP), mockDayRecommend);
-    expect(pfcCalculator.day(Mode.INCREASING), Information(proteins*increase, fat*increase, carbohydrates*increase, calories*increase));
-  });
-
-  testWidgets('бжу на день на завтрак обед ужин', (WidgetTester tester) async {
-    double breakfast = 0.35;
-    double lunch = 0.45;
-    double dinner = 0.2;
-    expect(pfcCalculator.meal(Meal.BREAKFAST, mockDayRecommend), Information(proteins*breakfast, fat*breakfast, carbohydrates*breakfast, calories*breakfast));
-    expect(pfcCalculator.meal(Meal.LUNCH, mockDayRecommend), Information(proteins*lunch, fat*lunch, carbohydrates*lunch, calories*lunch));
-    expect(pfcCalculator.meal(Meal.DINNER, mockDayRecommend), Information(proteins*dinner, fat*dinner, carbohydrates*dinner, calories*dinner));
-  });
-
-
 }

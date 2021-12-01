@@ -25,7 +25,7 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   DateTime? _rangeEnd;
 
   StatisticService statisticService = StatisticService.getStatisticService();
-  RecommendationService recommendationService = RecommendationService.getRecommendationService();
+  RecommendationService recommendationService = RecommendationService.service;
 
   @override
   Widget build(BuildContext context) {
@@ -111,27 +111,28 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   }
 
   showAlertDialog(BuildContext context) {
+    recommendationService.getRecommendation(DateTime.now()).then((rec) {
+      Widget okButton = TextButton(
+        child: Text("OK"),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      );
 
-    Widget okButton = TextButton(
-      child: Text("OK"),
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
-    );
+      AlertDialog alert = AlertDialog(
+        title: Text("Рекомендация"),
+        content: Text(rec),
+        actions: [
+          okButton,
+        ],
+      );
 
-    AlertDialog alert = AlertDialog(
-      title: Text("Рекомендация"),
-      content: Text(recommendationService.getRecommendation(DateTime.now())),
-      actions: [
-        okButton,
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
+    });
   }
 }
