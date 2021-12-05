@@ -143,4 +143,22 @@ class DBProvider {
         }
     ).first;
   }
+
+  Future<List> getCaloriesDaysStatistic(DateTime dateTimeFrom, DateTime dateTimeTo, Information rec) async {
+    final db = await database;
+    var res = await db.rawQuery(
+        "SELECT DATE(Information.datetime), sum( Dish.calories * Information.amount / 100 ) as identifier "
+                "FROM Information "
+                "JOIN Dish ON Information.dish_id = Dish.id "
+                "WHERE DATE(Information.datetime) > '${dateTimeFrom}' AND DATE(Information.datetime) < '${dateTimeTo}' "
+                "GROUP BY DATE(Information.datetime) "
+    );
+    var bigger = 0;
+    var less = 0;
+    for (var i in res.toList()){
+      intOrDefault(i['identifier'], 0) < rec.calories ? less++ : bigger++;
+    }
+    return [bigger.toDouble(), less.toDouble()];
+  }
+
 }

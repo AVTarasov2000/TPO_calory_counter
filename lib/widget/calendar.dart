@@ -28,6 +28,8 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   PfcWidget carbohydrates = PfcWidget(data: CircularDataPFC("carbohydrates", 0, Colors.blueGrey));
   PfcWidget watter        = PfcWidget(data: CircularDataPFC("watter", 0, Colors.deepPurple));
   PfcWidget proteins      = PfcWidget(data: CircularDataPFC("proteins", 0, Colors.blue));
+  PfcWidget greater_then  = PfcWidget(data: CircularDataPFC("to many calories", 0, Colors.black26));
+  PfcWidget less_then     = PfcWidget(data: CircularDataPFC("not enough calories", 0, Colors.black26));
 
   StatisticService statisticService = StatisticService.getStatisticService();
   RecommendationService recommendationService = RecommendationService.service;
@@ -91,6 +93,12 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
                 statisticService.getCarbohydrates(_rangeStart, _rangeEnd).then((val){setState(() {carbohydrates = PfcWidget(data: val);});});
                 statisticService.getProteins(_rangeStart, _rangeEnd).then((val){setState(() {proteins = PfcWidget(data: val);});});
                 statisticService.getWatter(_rangeStart, _rangeEnd).then((val){setState(() {watter = PfcWidget(data: val);});});
+                statisticService.getDayStatistic(_rangeStart, _rangeEnd).then( (val){
+                  setState(() {
+                    less_then = PfcWidget(data: CircularDataPFC("to many calories", val[0], Colors.black26));
+                    greater_then = PfcWidget(data: CircularDataPFC("not enough calories", val[1], Colors.black26),);
+                  });
+                });
               }
             },
             onRangeSelected: (start, end, focusedDay) {
@@ -107,6 +115,12 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
               statisticService.getCarbohydrates(_rangeStart, _rangeEnd).then((val){setState(() {carbohydrates = PfcWidget(data: val);});});
               statisticService.getProteins(_rangeStart, _rangeEnd).then((val){setState(() {proteins = PfcWidget(data: val);});});
               statisticService.getWatter(_rangeStart, _rangeEnd).then((val){setState(() {watter = PfcWidget(data: val);});});
+              statisticService.getDayStatistic(_rangeStart, _rangeEnd).then( (val){
+                setState(() {
+                  less_then = PfcWidget(data: CircularDataPFC("to many calories", val[0], Colors.black26));
+                  greater_then = PfcWidget(data: CircularDataPFC("not enough calories", val[1], Colors.black26),);
+                });
+              });
             },
             onFormatChanged: (format) {
               if (_calendarFormat != format) {
@@ -119,11 +133,27 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
               _focusedDay = focusedDay;
             },
           ),
-          calories,
-          fat,
-          carbohydrates,
-          proteins,
-          watter,
+          Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  calories,
+                  fat,
+                  carbohydrates,
+                  proteins,
+                  watter
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  greater_then,
+                  less_then
+                ],
+              )
+            ],
+          ),
           RaisedButton(
             child: Text('get recommendation'),
             onPressed: () {

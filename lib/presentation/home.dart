@@ -12,9 +12,19 @@ class StatisticService {
 
   static StatisticService? service;
 
+  UserService userService = UserService.service;
+
   static getStatisticService(){
     service ??= StatisticService();
     return service;
+  }
+
+  Future<List> getDayStatistic(DateTime? dateTimeFrom, DateTime? dateTimeTo) async{
+    Information inf = await userService.getUserLimit();
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      return await DBProvider.db.getCaloriesDaysStatistic(dateTimeFrom, dateTimeTo, inf);
+    }
+    return [0.0,0.0];
   }
 
   Future<CircularDataPFC> getCalories(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
