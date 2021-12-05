@@ -98,38 +98,38 @@ class RecommendationService {
         mealRecommend.proteins < 0 &&
         mealRecommend.watter < 0
     ){
-      result.add("вам стоит прекратить питание на сегодня \n");
+      result.add("вам стоит прекратить питание на сегодня \n\n");
       return result;
     }
 
     if(mealRecommend.calories > 0){
-      result.add("вам следует употреблять больше каллорий в пищу \n");
+      result.add("вам следует употреблять больше каллорий в пищу \n\n");
     } else if(mealRecommend.calories < 0){
-      result.add("вам следует употреблять меньше каллорий в пищу \n");
+      result.add("вам следует употреблять меньше каллорий в пищу \n\n");
     }
 
     if (mealRecommend.watter > 0){
-      result.add("вам следует употреблять больше воды \n");
+      result.add("вам следует употреблять больше воды \n\n");
     } else if (mealRecommend.watter < 0){
-      result.add("вам следует употреблять меньше воды \n");
+      result.add("вам следует употреблять меньше воды \n\n");
     }
 
     if (mealRecommend.fat > 0){
-      result.add("вам следует употреблять больше жиров, напримиер их много в" + await repository.getMostFats()+" \n");
+      result.add("вам следует употреблять больше жиров, напримиер их много в" + await repository.getMostFats()+" \n\n");
     } else if (mealRecommend.fat < 0){
-      result.add("вам следует употреблять меньше жиров \n");
+      result.add("вам следует употреблять меньше жиров \n\n");
     }
 
     if (mealRecommend.carbohydrates > 0){
-      result.add("вам следует употреблять больше углеводов, например их много в" + await repository.getMostCarbohidrates()+" \n");
+      result.add("вам следует употреблять больше углеводов, например их много в" + await repository.getMostCarbohidrates()+" \n\n");
     } else if (mealRecommend.carbohydrates < 0){
-      result.add("вам следует употреблять меньше углеводов \n");
+      result.add("вам следует употреблять меньше углеводов \n\n");
     }
 
     if (mealRecommend.proteins > 0){
-      result.add("вам следует употреблять больше протеинов, например их много в" + await repository.getMostProteins()+" \n");
+      result.add("вам следует употреблять больше протеинов, например их много в" + await repository.getMostProteins()+" \n\n");
     } else if (mealRecommend.proteins < 0){
-      result.add("вам следует употреблять меньше протеинов \n");
+      result.add("вам следует употреблять меньше протеинов \n\n");
     }
     return result;
   }
@@ -175,10 +175,10 @@ class RecommendationRepository{
     var start = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0));
     var end = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59));
     var res = await db.rawQuery(
-        "SELECT d.id, d.amount, d.name, d.proteins, d.fat, d.carbohydrates, d.calories, d.watter"
-        "FROM Information i"
-            "JOIN Dish d ON i.dish_id = d.id"
-            "WHERE i.datetime > '${start}' AND i.datetime < ${end} ");
+        "SELECT Dish.* "
+        "FROM Information "
+            "JOIN Dish ON Information.dish_id = Dish.id "
+            "WHERE Information.datetime > '${start}' AND Information.datetime < '${end}' ");
 
     return res.map((item){
       double amountCoef = intOrDefault(item["amount"], 0) / 100;

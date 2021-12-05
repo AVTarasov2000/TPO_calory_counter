@@ -38,17 +38,21 @@ class DBProvider {
     return _database!;
   }
 
-  initDB() async {
+  Future<String> getPath() async{
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path =join(documentsDirectory.path, "CaloriesCounterTest5.db");
-    return await openDatabase(path, version: 1, onOpen: (db) {
-    }, onCreate: (Database db, int version) async {
+    return join(documentsDirectory.path, "CaloriesCounterTest5.db");
+  }
+
+  initDB() async {
+
+    return await openDatabase(await getPath(), version: 1,
+        onOpen: (db) {},
+        onCreate: (Database db, int version) async {
       await db.execute(
           "CREATE TABLE Dish "
           "("
           "    id            INTEGER PRIMARY KEY,"
           "    name          TEXT,"
-
           "    proteins      INT,"
           "    fat           INT,"
           "    carbohydrates INT,"
