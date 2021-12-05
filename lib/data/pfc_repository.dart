@@ -1,4 +1,5 @@
 import 'package:calory_counter/domain/model/dish.dart';
+import 'package:calory_counter/presentation/util.dart';
 import 'package:intl/intl.dart';
 import "package:path/path.dart" show dirname, join;
 import 'dart:io' show Directory, File, Platform;
@@ -40,7 +41,7 @@ class DBProvider {
 
   Future<String> getPath() async{
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    return join(documentsDirectory.path, "CaloriesCounterTest5.db");
+    return join(documentsDirectory.path, "CaloriesCounterTest6.db");
   }
 
   initDB() async {
@@ -64,7 +65,7 @@ class DBProvider {
               "("
               "    id       INTEGER PRIMARY KEY,"
               "    datetime DATETIME,"
-              "    amount INT,"
+              "    amount   INT,"
               "    dish_id  INT REFERENCES Dish(id) "
           ")");
       await db.execute(
@@ -116,5 +117,30 @@ class DBProvider {
     final db = await database;
     var res = await db.query("Dish");
     return res.map((val){return {"display": val["name"],"value":val["id"]};}).toList();
+  }
+
+
+  Future<Information> getCaloriesBetween(DateTime dateTimeFrom, DateTime dateTimeTo) async {
+    final db = await database;
+    var res = await db.rawQuery(
+        "SELECT sum( Dish.calories * Information.amount / 100) as calories, "
+            "sum( Dish.fat * Information.amount / 100) as fat, "
+            "sum( Dish.carbohydrates * Information.amount / 100) as carbohydrates, "
+            "sum( Dish.watter * Information.amount / 100) as watter, "
+            "sum( Dish.proteins * Information.amount / 100) as proteins "
+            "FROM Information "
+            "JOIN Dish ON Information.dish_id = Dish.id "
+            "WHERE Information.datetime > '${dateTimeFrom}' AND Information.datetime < '${dateTimeTo}' ");
+
+    return res.map(
+            (item){
+          return Information(
+              intOrDefault(item["calories"], 0),
+              intOrDefault(item["carbohydrates"], 0),
+              intOrDefault(item["fat"], 0),
+              intOrDefault(item["proteins"], 0),
+              intOrDefault(item["watter"], 0));
+        }
+    ).first;
   }
 }

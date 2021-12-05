@@ -1,7 +1,6 @@
 import 'package:calory_counter/calendarLib/table_calendar.dart';
 import 'package:calory_counter/calendarLib/src/shared/utils.dart';
 import 'package:calory_counter/domain/model/circular_data_pfc.dart';
-import 'package:calory_counter/domain/model/recommendation.dart';
 import 'package:calory_counter/presentation/home.dart';
 import 'package:calory_counter/widget/pfc_vidget.dart';
 import 'package:calory_counter/widget/user_widget.dart';
@@ -21,11 +20,33 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  DateTime? _rangeStart;
-  DateTime? _rangeEnd;
+  DateTime? _rangeStart = DateTime.now();
+  DateTime? _rangeEnd = DateTime.now();
+
+  PfcWidget calories      = PfcWidget(data: CircularDataPFC("calories", 0, Colors.amberAccent));
+  PfcWidget fat           = PfcWidget(data: CircularDataPFC("fat", 0, Colors.greenAccent));
+  PfcWidget carbohydrates = PfcWidget(data: CircularDataPFC("carbohydrates", 0, Colors.blueGrey));
+  PfcWidget watter        = PfcWidget(data: CircularDataPFC("watter", 0, Colors.deepPurple));
+  PfcWidget proteins      = PfcWidget(data: CircularDataPFC("proteins", 0, Colors.blue));
 
   StatisticService statisticService = StatisticService.getStatisticService();
   RecommendationService recommendationService = RecommendationService.service;
+
+  @override
+  void initState() {
+    setState(() {
+      setSpines();
+    });
+    super.initState();
+  }
+
+  setSpines(){
+    statisticService.getCalories(_rangeStart, _rangeEnd).then((val){calories = PfcWidget(data: val);});
+    statisticService.getFat(_rangeStart, _rangeEnd).then((val){fat = PfcWidget(data: val);});
+    statisticService.getCarbohydrates(_rangeStart, _rangeEnd).then((val){carbohydrates = PfcWidget(data: val);});
+    statisticService.getProteins(_rangeStart, _rangeEnd).then((val){proteins = PfcWidget(data: val);});
+    statisticService.getWatter(_rangeStart, _rangeEnd).then((val){watter = PfcWidget(data: val);});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +84,13 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
                   _rangeStart = null; // Important to clean those
                   _rangeEnd = null;
                   _rangeSelectionMode = RangeSelectionMode.toggledOff;
+                  // calories = PfcWidget(data: statisticService.getCalories(_rangeStart, _rangeEnd),);
                 });
+                statisticService.getCalories(_rangeStart, _rangeEnd).then((val){ setState(() {calories = PfcWidget(data: val);});});
+                statisticService.getFat(_rangeStart, _rangeEnd).then((val){setState(() {fat = PfcWidget(data: val);});});
+                statisticService.getCarbohydrates(_rangeStart, _rangeEnd).then((val){setState(() {carbohydrates = PfcWidget(data: val);});});
+                statisticService.getProteins(_rangeStart, _rangeEnd).then((val){setState(() {proteins = PfcWidget(data: val);});});
+                statisticService.getWatter(_rangeStart, _rangeEnd).then((val){setState(() {watter = PfcWidget(data: val);});});
               }
             },
             onRangeSelected: (start, end, focusedDay) {
@@ -73,7 +100,13 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
                 _rangeStart = start;
                 _rangeEnd = end;
                 _rangeSelectionMode = RangeSelectionMode.toggledOn;
+                // calories = PfcWidget(data: statisticService.getCalories(_rangeStart, _rangeEnd),);
               });
+              statisticService.getCalories(_rangeStart, _rangeEnd).then((val){ setState(() {calories = PfcWidget(data: val);});});
+              statisticService.getFat(_rangeStart, _rangeEnd).then((val){setState(() {fat = PfcWidget(data: val);});});
+              statisticService.getCarbohydrates(_rangeStart, _rangeEnd).then((val){setState(() {carbohydrates = PfcWidget(data: val);});});
+              statisticService.getProteins(_rangeStart, _rangeEnd).then((val){setState(() {proteins = PfcWidget(data: val);});});
+              statisticService.getWatter(_rangeStart, _rangeEnd).then((val){setState(() {watter = PfcWidget(data: val);});});
             },
             onFormatChanged: (format) {
               if (_calendarFormat != format) {
@@ -86,11 +119,11 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
               _focusedDay = focusedDay;
             },
           ),
-          PfcWidget(data: statisticService.getCalories(_focusedDay),),
-          PfcWidget(data: statisticService.getFat(_focusedDay),),
-          PfcWidget(data: statisticService.getCarbohydrates(_focusedDay),),
-          PfcWidget(data: statisticService.getProteins(_focusedDay),),
-          PfcWidget(data: statisticService.getWater(_focusedDay),),
+          calories,
+          fat,
+          carbohydrates,
+          proteins,
+          watter,
           RaisedButton(
             child: Text('get recommendation'),
             onPressed: () {

@@ -17,31 +17,81 @@ class StatisticService {
     return service;
   }
 
-  CircularDataPFC calories = CircularDataPFC("calories", 9, Colors.amberAccent);
-  CircularDataPFC fat = CircularDataPFC("fat", 9, Colors.greenAccent);
-  CircularDataPFC carbohydrates = CircularDataPFC("carbohydrates", 9, Colors.blueGrey);
-  CircularDataPFC proteins = CircularDataPFC("proteins", 9, Colors.deepPurple);
-  CircularDataPFC water = CircularDataPFC("water", 9, Colors.blue);
+  Future<CircularDataPFC> getCalories(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
 
-  getCalories(DateTime dateTime) {
-    return CircularDataPFC("calories", dateTime.day.toDouble(), Colors.amberAccent);
-    // return calories;
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      Information res = await DBProvider.db.getCaloriesBetween(dateTimeFrom, dateTimeTo);
+      return CircularDataPFC("calories", res.calories, Colors.amberAccent);
+    }
+    if(dateTimeFrom != null) {
+      DateTime start = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 0, 0, 0);
+      DateTime end = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 23, 59, 59);
+
+      Information res = await DBProvider.db.getCaloriesBetween(start, end);
+      return CircularDataPFC("calories", res.calories, Colors.amberAccent);
+    }
+    return CircularDataPFC("calories", 0, Colors.amberAccent);
   }
 
-  getFat(DateTime dateTime) {
-    return fat;
-  }
+  Future<CircularDataPFC> getFat(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
 
-  getCarbohydrates(DateTime dateTime) {
-    return carbohydrates;
-  }
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      Information res = await DBProvider.db.getCaloriesBetween(dateTimeFrom, dateTimeTo);
+      return CircularDataPFC("fat", res.fat, Colors.greenAccent);
+    }
+    if(dateTimeFrom != null) {
+      DateTime start = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 0, 0, 0);
+      DateTime end = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 23, 59, 59);
 
-  getProteins(DateTime dateTime) {
-    return proteins;
+      Information res = await DBProvider.db.getCaloriesBetween(start, end);
+      return CircularDataPFC("fat", res.fat, Colors.greenAccent);
+    }
+    return CircularDataPFC("fat", 0, Colors.greenAccent);
   }
+  Future<CircularDataPFC> getCarbohydrates(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
 
-  getWater(DateTime dateTime) {
-    return water;
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      Information res = await DBProvider.db.getCaloriesBetween(dateTimeFrom, dateTimeTo);
+      return CircularDataPFC("carbohydrates", res.carbohydrates, Colors.blueGrey);
+    }
+    if(dateTimeFrom != null) {
+      DateTime start = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 0, 0, 0);
+      DateTime end = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 23, 59, 59);
+
+      Information res = await DBProvider.db.getCaloriesBetween(start, end);
+      return CircularDataPFC("carbohydrates", res.carbohydrates, Colors.blueGrey);
+    }
+    return CircularDataPFC("carbohydrates", 0, Colors.blueGrey);
+  }
+  Future<CircularDataPFC> getProteins(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
+
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      Information res = await DBProvider.db.getCaloriesBetween(dateTimeFrom, dateTimeTo);
+      return CircularDataPFC("proteins", res.proteins, Colors.deepPurple);
+    }
+    if(dateTimeFrom != null) {
+      DateTime start = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 0, 0, 0);
+      DateTime end = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 23, 59, 59);
+
+      Information res = await DBProvider.db.getCaloriesBetween(start, end);
+      return CircularDataPFC("proteins", res.proteins, Colors.deepPurple);
+    }
+    return CircularDataPFC("proteins", 0, Colors.deepPurple);
+  }
+  Future<CircularDataPFC> getWatter(DateTime? dateTimeFrom, DateTime? dateTimeTo) async {
+
+    if(dateTimeFrom != null && dateTimeTo != null) {
+      Information res = await DBProvider.db.getCaloriesBetween(dateTimeFrom, dateTimeTo);
+      return CircularDataPFC("water", res.watter, Colors.blue);
+    }
+    if(dateTimeFrom != null) {
+      DateTime start = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 0, 0, 0);
+      DateTime end = DateTime(dateTimeFrom.year, dateTimeFrom.month, dateTimeFrom.day, 23, 59, 59);
+
+      Information res = await DBProvider.db.getCaloriesBetween(start, end);
+      return CircularDataPFC("water", res.watter, Colors.blue);
+    }
+    return CircularDataPFC("water", 0, Colors.blue);
   }
 }
 
@@ -175,19 +225,19 @@ class RecommendationRepository{
     var start = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0));
     var end = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59));
     var res = await db.rawQuery(
-        "SELECT Dish.* "
-        "FROM Information "
+        "SELECT Dish.*, Information.* "
+            "FROM Information "
             "JOIN Dish ON Information.dish_id = Dish.id "
             "WHERE Information.datetime > '${start}' AND Information.datetime < '${end}' ");
 
     return res.map((item){
       double amountCoef = intOrDefault(item["amount"], 0) / 100;
       return Information(
-        intOrDefault(item["calories"], 0) * amountCoef,
-        intOrDefault(item["carbohydrates"], 0) * amountCoef,
-        intOrDefault(item["fat"], 0) * amountCoef,
-        intOrDefault(item["proteins"], 0) * amountCoef,
-        intOrDefault(item["watter"], 0) * amountCoef);
+          intOrDefault(item["calories"], 0) * amountCoef,
+          intOrDefault(item["carbohydrates"], 0) * amountCoef,
+          intOrDefault(item["fat"], 0) * amountCoef,
+          intOrDefault(item["proteins"], 0) * amountCoef,
+          intOrDefault(item["watter"], 0) * amountCoef);
     }).toList();
   }
 
