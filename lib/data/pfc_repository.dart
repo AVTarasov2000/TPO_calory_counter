@@ -123,11 +123,11 @@ class DBProvider {
   Future<Information> getCaloriesBetween(DateTime dateTimeFrom, DateTime dateTimeTo) async {
     final db = await database;
     var res = await db.rawQuery(
-        "SELECT sum( Dish.calories * Information.amount / 100) as calories, "
-            "sum( Dish.fat * Information.amount / 100) as fat, "
-            "sum( Dish.carbohydrates * Information.amount / 100) as carbohydrates, "
-            "sum( Dish.watter * Information.amount / 100) as watter, "
-            "sum( Dish.proteins * Information.amount / 100) as proteins "
+        "SELECT sum( Dish.calories * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as calories, "
+            "sum( Dish.fat * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as fat, "
+            "sum( Dish.carbohydrates * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as carbohydrates, "
+            "sum( Dish.watter * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as watter, "
+            "sum( Dish.proteins * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as proteins "
             "FROM Information "
             "JOIN Dish ON Information.dish_id = Dish.id "
             "WHERE Information.datetime > '${dateTimeFrom}' AND Information.datetime < '${dateTimeTo}' ");

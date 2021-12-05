@@ -24,7 +24,7 @@ class _PfcWidget extends State<PfcWidget> {
           radius: 60.0,
           lineWidth: 5.0,
           percent: 0.8,
-          center: new Text(widget.data.value.toString()+"%"),
+          center: new Text(widget.data.value.toString()),
           progressColor: widget.data.color,
         ),
         Text(widget.data.title)
