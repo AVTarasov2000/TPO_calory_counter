@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:calory_counter/data/pfc_repository.dart';
 import 'package:calory_counter/domain/model/information.dart';
@@ -77,14 +76,14 @@ void main() {
 
     test('список блюд по дате', () async {
       final db = await recommendationRepository.dbProvider.database;
-      db.rawInsert(
+      db.execute(
           "INSERT INTO Dish (id,name,proteins,fat,carbohydrates,calories,watter) "
               "VALUES "
               "(7,'картошка', 7, 7, 7, 7, 7),"
               "(8,'котлета', 8, 8, 8, 8, 8),"
               "(9,'макарошки', 9, 9, 9, 9, 9),"
               "(10,'пюрешка', 10, 10, 10, 10, 10)");
-      db.rawInsert(
+      db.execute(
           "INSERT INTO Information (datetime, amount, dish_id)"
               " VALUES ('2021-11-08 11:35:11', 200, 10)");
 
@@ -94,15 +93,15 @@ void main() {
 
     test('рекомендация блюда', () async {
       final db = await recommendationRepository.dbProvider.database;
-      db.rawInsert(
+      db.execute(
           "INSERT INTO Dish (id,name,calories,proteins,fat,carbohydrates,watter) "
               "VALUES "
-              "(7,'картошка', 7, 1, 2, 3, 7),"
-              "(8,'котлета', 8, 3, 1, 2, 8),"
-              "(9,'макарошки', 9, 2, 3, 1, 9)");
-      expect(recommendationRepository.getMostProteins(), "котлета");
-      expect(recommendationRepository.getMostFats(), "макарошки");
-      expect(recommendationRepository.getMostCarbohidrates(), "картошка");
+              "(11,'картошка', 70, 10, 20, 30, 70),"
+              "(12,'котлета', 80, 30, 10, 20, 80),"
+              "(13,'макарошки', 90, 20, 30, 10, 90)");
+      expect(await recommendationRepository.getMostProteins(), "котлета");
+      expect(await recommendationRepository.getMostFats(), "макарошки");
+      expect(await recommendationRepository.getMostCarbohidrates(), "картошка");
     });
   });
 }

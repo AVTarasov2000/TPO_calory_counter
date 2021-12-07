@@ -7,8 +7,7 @@ import 'dart:io' show Directory, File, Platform;
 import 'package:calory_counter/domain/model/information.dart';
 import 'package:calory_counter/domain/model/user.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqlite_api.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 
 class PFCRepository{
@@ -41,67 +40,73 @@ class DBProvider {
 
   Future<String> getPath() async{
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    return join(documentsDirectory.path, "CaloriesCounterTest6.db");
+    return join(documentsDirectory.path, "CaloriesCounterTest7.db");
   }
 
   initDB() async {
 
-    return await openDatabase(await getPath(), version: 1,
-        onOpen: (db) {},
-        onCreate: (Database db, int version) async {
-      await db.execute(
-          "CREATE TABLE Dish "
-          "("
-          "    id            INTEGER PRIMARY KEY,"
-          "    name          TEXT,"
-          "    proteins      INT,"
-          "    fat           INT,"
-          "    carbohydrates INT,"
-          "    calories      INT,"
-          "    watter        INT"
-          ")");
-      await db.execute(
-              "CREATE TABLE Information "
-              "("
-              "    id       INTEGER PRIMARY KEY,"
-              "    datetime DATETIME,"
-              "    amount   INT,"
-              "    dish_id  INT REFERENCES Dish(id) "
-          ")");
-      await db.execute(
-          "CREATE TABLE MyUser "
-          "("
-          "    id     INTEGER PRIMARY KEY,"
-          "    height INT,"
-          "    weight INT,"
-          "    age    INT,"
-          "    mode   INT"
-          ")"
-      );
-      await db.rawInsert(
-          "INSERT INTO MyUser ( id, height, weight, age, mode )"
-              " VALUES ( 0, 170, 60, 25, 2 )");
-      await db.rawInsert(
-          "INSERT INTO Dish (name,proteins,fat,carbohydrates,calories,watter) "
-          "VALUES "
-              "('картошка', 10, 10, 10, 10, 10),"
-              "('котлета', 10, 10, 10, 10, 10),"
-              "('макарошки', 10, 10, 10, 10, 10),"
-              "('пюрешка', 10, 10, 10, 10, 10)");
-    });
+    var db = sqlite3.open(await getPath());
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS Dish "
+            "("
+            "    id            INTEGER PRIMARY KEY,"
+            "    name          TEXT,"
+            "    proteins      INT,"
+            "    fat           INT,"
+            "    carbohydrates INT,"
+            "    calories      INT,"
+            "    watter        INT"
+            ")");
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS Information "
+            "("
+            "    id       INTEGER PRIMARY KEY,"
+            "    datetime DATETIME,"
+            "    amount   INT,"
+            "    dish_id  INT REFERENCES Dish(id) "
+            ")");
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS MyUser "
+            "("
+            "    id     INTEGER PRIMARY KEY,"
+            "    height INT,"
+            "    weight INT,"
+            "    age    INT,"
+            "    mode   INT"
+            ")"
+    );
+    db.execute(
+        "INSERT INTO MyUser ( id, height, weight, age, mode )"
+            " VALUES ( 0, 170, 60, 25, 2 )");
+    db.execute(
+        "INSERT INTO Dish (name,proteins,fat,carbohydrates,calories,watter) "
+            "VALUES "
+            "('картошка', 10, 10, 10, 10, 10),"
+            "('котлета', 10, 10, 10, 10, 10),"
+            "('макарошки', 10, 10, 10, 10, 10),"
+            "('пюрешка', 10, 10, 10, 10, 10)");
+    return db;
+
   }
 
   saveUser(User user) async {
     final db = await database;
-    var res = await db.update("MyUser", user.toJson());
-    return res;
+    db.execute("UPDATE MyUser "
+        "SET  "
+        "height =  ${user.height}, "
+        "weight = ${user.weight}, "
+        "age = ${user.age}, "
+        "mode = ${user.mode} "
+        "WHERE id =  ${user.id};");
+    // var res = await db.update("MyUser", user.toJson());
+    // return res;
   }
 
   saveMeal(List<Dish> meal, DateTime dateTime) async{
     final db = await database;
     var datetime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
     for (var dish in meal) {
-      await db.rawInsert(
+      db.execute(
         "INSERT INTO Information (datetime, amount, dish_id)"
           " VALUES ('${datetime}', ${dish.amount}, ${dish.id})");
     }
@@ -109,20 +114,21 @@ class DBProvider {
 
   getUser() async {
     final db = await database;
-    var res = await db.query("MyUser", where: "id = ?", whereArgs: [0]);
+    // var res = await db.select("MyUser", where: "id = ?", whereArgs: [0]);
+    var res = db.select("select * FROM MyUser where id = 0");
     return res.isNotEmpty ? User.fromJson(res.first) : User(0,0,0,0,0);
   }
 
   Future<List> allDishes() async{
     final db = await database;
-    var res = await db.query("Dish");
+    var res = db.select("select * from Dish");
     return res.map((val){return {"display": val["name"],"value":val["id"]};}).toList();
   }
 
 
   Future<Information> getCaloriesBetween(DateTime dateTimeFrom, DateTime dateTimeTo) async {
     final db = await database;
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT sum( Dish.calories * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as calories, "
             "sum( Dish.fat * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as fat, "
             "sum( Dish.carbohydrates * Information.amount / 100)/(SELECT count(DISTINCT(DATE(datetime))) from Information ) as carbohydrates, "
@@ -146,7 +152,7 @@ class DBProvider {
 
   Future<List> getCaloriesDaysStatistic(DateTime dateTimeFrom, DateTime dateTimeTo, Information rec) async {
     final db = await database;
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT DATE(Information.datetime), sum( Dish.calories * Information.amount / 100 ) as identifier "
                 "FROM Information "
                 "JOIN Dish ON Information.dish_id = Dish.id "
@@ -160,5 +166,7 @@ class DBProvider {
     }
     return [bigger.toDouble(), less.toDouble()];
   }
+
+  deleteDB() {}
 
 }

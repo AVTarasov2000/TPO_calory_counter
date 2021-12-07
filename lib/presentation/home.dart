@@ -234,7 +234,7 @@ class RecommendationRepository{
     final db = await dbProvider.database;
     var start = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 0, 0, 0));
     var end = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59));
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT Dish.*, Information.* "
             "FROM Information "
             "JOIN Dish ON Information.dish_id = Dish.id "
@@ -253,30 +253,33 @@ class RecommendationRepository{
 
   Future<String> getMostFats() async {
     final db = await dbProvider.database;
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT name "
             "FROM Dish "
             "Order By fat "
+            "DESC "
             "LIMIT 1");
     return res.first["name"].toString();
   }
 
   Future<String> getMostCarbohidrates() async {
     final db = await dbProvider.database;
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT name "
             "FROM Dish "
             "Order By carbohydrates "
+            "DESC "
             "LIMIT 1");
     return res.first["name"].toString();
   }
 
   Future<String> getMostProteins() async {
     final db = await dbProvider.database;
-    var res = await db.rawQuery(
+    var res = await db.select(
         "SELECT name "
             "FROM Dish "
             "Order By proteins "
+            "DESC "
             "LIMIT 1");
     return res.first["name"].toString();
   }
